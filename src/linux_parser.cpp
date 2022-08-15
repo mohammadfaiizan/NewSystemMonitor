@@ -109,13 +109,36 @@ long LinuxParser::Jiffies() { return 0; }
 long LinuxParser::ActiveJiffies(int pid[[maybe_unused]]) { return 0; }
 
 // TODO: Read and return the number of active jiffies for the system
-long LinuxParser::ActiveJiffies() { return 0; }
+long LinuxParser::ActiveJiffies() { 
+  std::vector <long> JifCPU = CpuUtilization();
+  return JifCPU[kSoftIRQ_] + JifCPU[kSteal_] + JifCPU[kUser_] + JifCPU[kNice_] + JifCPU[kSystem_] + 
+         JifCPU[kIRQ_];
+}
 
 // TODO: Read and return the number of idle jiffies for the system
-long LinuxParser::IdleJiffies() { return 0; }
+long LinuxParser::IdleJiffies() { 
+  std::vector <long> JifCPU = CpuUtilization();
+  return JifCPU[kIOwait_] + JifCPU[kIdle_];  
+}
 
 // TODO: Read and return CPU utilization
-vector<string> LinuxParser::CpuUtilization() { return {}; }
+vector<long> LinuxParser::CpuUtilization() { 
+  std::vector<long> JifCPU;
+  std::string path(kProcDirectory + kStatFilename);
+  std::ifstream filestream(path);
+  if (filestream.is_open()) {
+    std::string cpu;
+    filestream >> cpu;
+    if (cpu == "cpu") {
+      for (int i = 0; i < CPUStates::END; i++) {
+        long value;
+        filestream >> value;
+        JifCPU.push_back(value);
+      }
+    }
+  }
+  return JifCPU;
+}
 
 // TODO: Read and return the total number of processes
 int LinuxParser::TotalProcesses() { 
