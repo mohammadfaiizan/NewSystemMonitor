@@ -26,5 +26,5 @@ float Process::CpuUtilization() {
 string Process::Command() { return _cmd; }
 string Process::Ram() { return LinuxParser::Ram(_id); }
 string Process::User() { return _user; }
-long int Process::UpTime() { return LinuxParser::UpTime(_id); }
+long int Process::UpTime() { return (LinuxParser::UpTime() - LinuxParser::UpTime(_id)); }
 bool Process::operator>(Process const& a) const { return this->_cpuUtil > a._cpuUtil; }
